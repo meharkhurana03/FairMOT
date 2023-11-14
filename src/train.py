@@ -17,6 +17,14 @@ from logger import Logger
 from datasets.dataset_factory import get_dataset
 from trains.train_factory import train_factory
 
+import subprocess
+
+def get_nvidia_smi_output():
+    """Gets the output of the nvidia-smi command."""
+    process = subprocess.Popen(["nvidia-smi"], stdout=subprocess.PIPE)
+    output, err = process.communicate()
+    return output.decode("utf-8")
+
 
 def main(opt):
     torch.manual_seed(opt.seed)
@@ -65,13 +73,14 @@ def main(opt):
             model, opt.load_model, trainer.optimizer, opt.resume, opt.lr, opt.lr_step)
 
     for epoch in range(start_epoch + 1, opt.num_epochs + 1):
+        print(get_nvidia_smi_output())
         mark = epoch if opt.save_all else 'last'
         log_dict_train, _ = trainer.train(epoch, train_loader)
         logger.write('epoch: {} |'.format(epoch))
         for k, v in log_dict_train.items():
             logger.scalar_summary('train_{}'.format(k), v, epoch)
             logger.write('{} {:8f} | '.format(k, v))
-
+        print(get_nvidia_smi_output())
         if opt.val_intervals > 0 and epoch % opt.val_intervals == 0:
             save_model(os.path.join(opt.save_dir, 'model_{}.pth'.format(mark)),
                        epoch, model, optimizer)
@@ -79,6 +88,7 @@ def main(opt):
             save_model(os.path.join(opt.save_dir, 'model_last.pth'),
                        epoch, model, optimizer)
         logger.write('\n')
+        print(get_nvidia_smi_output())
         if epoch in opt.lr_step:
             save_model(os.path.join(opt.save_dir, 'model_{}.pth'.format(epoch)),
                        epoch, model, optimizer)

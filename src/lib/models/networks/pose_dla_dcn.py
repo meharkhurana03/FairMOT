@@ -12,7 +12,14 @@ import torch
 from torch import nn
 import torch.nn.functional as F
 import torch.utils.model_zoo as model_zoo
-
+import sys
+# TODO: handle this
+sys.path.append('/usr/lib/python3.8/site-packages')
+import pkg_resources
+ 
+installed_packages = pkg_resources.working_set
+for package in installed_packages:
+    print(f"{package.key}=={package.version}")
 from dcn_v2 import DCN
 
 BN_MOMENTUM = 0.1

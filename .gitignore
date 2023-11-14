@@ -1,1 +1,9 @@
 .idea
+
+*.DS_Store
+.vscode/
+DCNv2/
+*__pycache__/
+
+MOT15/
+MOT17/
